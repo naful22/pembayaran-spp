@@ -1,16 +1,28 @@
 <?php
 include 'koneksi.php';
 
-// Handle Filter
-$filterKelas = '';
-if (isset($_POST['filterKelas'])) {
-    $filterKelas = $_POST['kelas'];
-    $query = "SELECT * FROM siswa WHERE Kelas LIKE '%$filterKelas%'";
+// Handle Filter (if any)
+$filterBulan = '';
+if (isset($_POST['filterBulan'])) {
+    $filterBulan = $_POST['bulan'];
+    $query = "
+        SELECT siswa.Nama, siswa.Nis, pembayaran.Bulan, pembayaran.Status, pembayaran.Jumlah
+        FROM siswa
+        JOIN pembayaran ON siswa.Nis = pembayaran.Nis
+        WHERE pembayaran.Bulan LIKE '%$filterBulan%'";
 } else {
-    $query = "SELECT * FROM siswa";
+    $query = "
+        SELECT siswa.Nama, siswa.Nis, pembayaran.Bulan, pembayaran.Status, pembayaran.Jumlah
+        FROM siswa
+        JOIN pembayaran ON siswa.Nis = pembayaran.Nis";
 }
+
 $result = mysqli_query($koneksi, $query);
 
+if (!$result) {
+    echo "Error: " . mysqli_error($koneksi);
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
@@ -18,54 +30,136 @@ $result = mysqli_query($koneksi, $query);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Siswa</title>
+    <title>Laporan</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-</head>
-<body>
-<div class="container mt-4">
-    <h1>Laporan</h1>
-    <!-- Filter Form -->
-    <form method="POST" action="laporan.php" class="form-inline mb-3">
-        <label for="kelas" class="mr-2">Filter Kelas:</label>
-        <input type="text" name="kelas" id="kelas" class="form-control mr-2" placeholder="Masukkan Kelas" value="<?php echo $filterKelas; ?>">
-        <button type="submit" name="filterKelas" class="btn btn-primary">Filter</button>
-        <a href="laporan.php" class="btn btn-secondary ml-2">Reset</a>
-    </form>
-
-    <!-- Table Data Siswa -->
-    <table class="table table-bordered">
-        <thead>
-        <tr>
-            <th>No</th>
-            <th>NIS</th>
-            <th>Nama</th>
-            <th>Kelas</th>
-            <th>Alamat</th>
-        </tr>
-        </thead>
-        <tbody>
-        <?php
-        $no = 1;
-        while ($row = mysqli_fetch_assoc($result)) {
-            echo "<tr>";
-            echo "<td>$no</td>";
-            echo "<td>{$row['Nis']}</td>";
-            echo "<td>{$row['Nama']}</td>";
-            echo "<td>{$row['Kelas']}</td>";
-            echo "<td>{$row['Alamat']}</td>";
-            echo "</tr>";
-            $no++;
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <style>
+        body {
+            background-color: #f4f6f9;
         }
-        ?>
-        </tbody>
-    </table>
+        .content-wrapper {
+            margin-left: 200px;
+        }
+        .table {
+            margin-top: 20px;
+        }
+        .table th {
+            background-color: #007bff;
+            color: white;
+        }
+        .table tbody tr:hover {
+            background-color: #e9ecef;
+        }
+        .btn-print {
+    background-color: #007bff;
+    color: white;
+    padding: 5px 10px; /* Reduced padding for a smaller button */
+    border-radius: 5px;
+    font-weight: normal; /* Optional: to make the text less bold */
+    font-size: 14px; /* Adjust the font size */
+    transition: background-color 0.3s;
+}
+.btn-print:hover {
+    background-color: #0056b3;
+}
 
-    <!-- Button Cetak -->
-    <button class="btn btn-success" onclick="window.print()">Cetak Laporan</button>
+    </style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <!-- Sidebar -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <a href="#" class="brand-link">
+            <img src="image/admin.png" alt="Logo" class="brand-image img-circle elevation-3">
+            <span class="brand-text font-weight-light">ADMIN</span>
+        </a>
+        <div class="sidebar">
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                    <li class="nav-item">
+                        <a href="dashboard.php" class="nav-link">
+                            <i class="nav-icon fas fa-home"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="data_siswa.php" class="nav-link">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>Data Siswa</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="pembayaran.php" class="nav-link">
+                            <i class="nav-icon fas fa-credit-card"></i>
+                            <p>Pembayaran</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="laporan.php" class="nav-link active">
+                            <i class="nav-icon fas fa-file-alt"></i>
+                            <p>Laporan</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="logout.php" class="nav-link">
+                            <i class="nav-icon fas fa-sign-out-alt"></i>
+                            <p>Logout</p>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Content -->
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1></h1>
+        </section>
+
+        <section class="content">
+            <div class="container mt-4">
+                <!-- Filter Form -->
+                <form method="POST" action="" class="form-inline mb-3">
+                    <label for="bulan" class="mr-2">Filter Bulan:</label>
+                    <input type="text" name="bulan" id="bulan" class="form-control mr-2" placeholder="Masukkan Bulan" value="<?php echo $filterBulan; ?>">
+                    <button type="submit" name="filterBulan" class="btn btn-primary">Filter</button>
+                    <a href="laporan_pembayaran.php" class="btn btn-secondary ml-2">Reset</a>
+                </form>
+
+                <!-- Table Laporan Pembayaran -->
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Nama</th>
+                            <th>Nis</th>
+                            <th>Bulan</th>
+                            <th>Status</th>
+                            <th>Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($row = mysqli_fetch_assoc($result)) { ?>
+                        <tr>
+                            <td><?php echo $row['Nama']; ?></td>
+                            <td><?php echo $row['Nis']; ?></td>
+                            <td><?php echo $row['Bulan']; ?></td>
+                            <td><?php echo $row['Status']; ?></td>
+                            <td><?php echo 'Rp ' . number_format($row['Jumlah'], 0, ',', '.'); ?></td>
+                        </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+
+                <!-- Print Button -->
+                <button class="btn-print" onclick="window.print()">Cetak Laporan</button>
+            </div>
+        </section>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

@@ -1,63 +1,74 @@
+<?php
+session_start();
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Pembayaran Spp</title>
+    <title>Dashboard Pembayaran</title>
     <!-- AdminLTE CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Ensure the cards take up the same width as the chart */
-        .small-box {
-            min-height: 150px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+    /* Override sidebar width */
+    .content-wrapper {
+        margin-left: 0; /* Reset any margin from previous customizations */
+        margin-left: 200px; /* Adjust the left margin to match the sidebar width */
+    }
+
+    /* Ensure the active link is visible */
+    .nav-link.active {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    /* Optional: Adjust the font size and padding of the nav link for better visibility */
+    .nav-link {
+        font-size: 14px; /* Adjust font size */
+        padding-left: 10px; /* Add some padding to the left */
+        padding-right: 10px; /* Add some padding to the right */
+    }
+
+    /* Add responsiveness to the sidebar and content area */
+    @media (max-width: 767px) {
+        .main-sidebar {
+            width: 150px; /* Reduce sidebar width for smaller screens */
         }
-        .small-box-footer {
-            padding: 10px;
+        .content-wrapper {
+            margin-left: 150px; /* Adjust content-wrapper for smaller screens */
         }
-        .row {
-            display: flex;
-            flex-wrap: wrap;  /* Allows the cards to wrap on smaller screens */
-            gap: 10px;
-            justify-content: space-between;
-        }
-        .col-lg-4, .col-md-4 {
-            flex: 1;
-            min-width: 30%; /* Each card takes up 1/3 of the width */
-            max-width: 33%; /* Ensures 3 cards per row */
-        }
-        .col-lg-12 {
-            flex: 1;
-            width: 100%;
-        }
+    }
+
+    /* Custom style for Laporan small-box-footer */
+    .small-box.bg-warning .small-box-footer {
+        color: white !important; /* Change color to white */
+    }
     </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
     <!-- Navbar -->
     <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-            </li>
-        </ul>
+        <!-- Navbar content can remain here -->
     </nav>
     <!-- Sidebar -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
         <a href="#" class="brand-link">
-            <img src="image/admin.jpg" alt="Logo TPQ" class="brand-image img-circle elevation-3" style="opacity: .8;">
-            <span class="brand-text font-weight-light">TPQ Al-MA'ARIF</span>
+            <img src="image/admin.png" alt="Logo TPQ" class="brand-image img-circle elevation-3">
+            <span class="brand-text">ADMIN TPQ</span>
         </a>
         <div class="sidebar">
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
                     <li class="nav-item">
-                        <a href="dashboard.html" class="nav-link">
+                        <a href="dashboard.php" class="nav-link active">
                             <i class="nav-icon fas fa-home"></i>
                             <p>Dashboard</p>
                         </a>
@@ -80,7 +91,6 @@
                             <p>Laporan</p>
                         </a>
                     </li>
-                    <!-- Logout -->
                     <li class="nav-item">
                         <a href="logout.php" class="nav-link" onclick="return confirmLogout();">
                             <i class="nav-icon fas fa-sign-out-alt"></i>
@@ -95,7 +105,7 @@
     <!-- Content -->
     <div class="content-wrapper">
         <section class="content-header">
-            <h1>Dashboard Pembayaran SPP</h1>
+            <h1>Dashboard Pembayaran</h1>
         </section>
         <section class="content">
             <!-- Cards -->
@@ -104,7 +114,7 @@
                 <div class="col-lg-4 col-md-4">
                     <div class="small-box bg-info">
                         <div class="inner">
-                            <h3>50</h3>
+                            <h3>300</h3>
                             <p>Data Siswa</p>
                         </div>
                         <div class="icon">
@@ -117,7 +127,7 @@
                 <div class="col-lg-4 col-md-4">
                     <div class="small-box bg-success">
                         <div class="inner">
-                            <h3>30</h3>
+                            <h3>150</h3>
                             <p>Pembayaran</p>
                         </div>
                         <div class="icon">
@@ -130,7 +140,7 @@
                 <div class="col-lg-4 col-md-4">
                     <div class="small-box bg-warning">
                         <div class="inner">
-                            <h3 class="text-light">20</h3>
+                            <h3 class="text-light">150</h3>
                             <p class="text-light">Laporan</p>
                         </div>
                         <div class="icon">
@@ -146,7 +156,7 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Statistik Pembayaran</h3>
+                            <h3 class="card-title">Data Statistik Pembayaran</h3>
                         </div>
                         <div class="card-body">
                             <canvas id="paymentChart"></canvas>
@@ -169,7 +179,7 @@
         data: {
             labels: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni'],
             datasets: [{
-                label: 'Pembayaran',
+                label: 'Pembayaran / Bulan',
                 data: [50, 60, 70, 80, 90, 100],
                 backgroundColor: 'rgba(54, 162, 235, 0.5)',
                 borderColor: 'rgba(54, 162, 235, 1)',
@@ -188,7 +198,6 @@
 
     // Fungsi konfirmasi logout
     function confirmLogout() {
-        // Menampilkan pesan konfirmasi logout
         return confirm("Apakah Anda yakin mau keluar dari halaman ini?");
     }
 </script>

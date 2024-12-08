@@ -1,3 +1,28 @@
+<?php
+session_start();
+include 'koneksi.php'; // Pastikan file koneksi database sudah benar
+
+$error_message = ''; // Variabel untuk pesan error
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Ambil input username dan password dari form
+    $username = mysqli_real_escape_string($koneksi, $_POST['username']);
+    $password = mysqli_real_escape_string($koneksi, $_POST['password']);
+
+    // Query untuk memeriksa kombinasi username dan password
+    $query = "SELECT * FROM admin WHERE username = '$username' AND password = '$password'";
+    $result = mysqli_query($koneksi, $query);
+
+    if (mysqli_num_rows($result) > 0) {
+        $_SESSION['username'] = $username; // Simpan username dalam sesi
+        header("Location: dashboard.php"); // Arahkan ke dashboard jika login berhasil
+        exit();
+    } else {
+        $error_message = "Username atau password salah!"; // Pesan kesalahan login
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,18 +37,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
-        }
-        .background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('image/tpq1.jpg');
+            background-image: url('image/sekolah.jpg');
             background-size: cover;
             background-position: center;
-            z-index: -1; /* Mengatur gambar di belakang konten */
+            background-repeat: no-repeat;
         }
         .login-container {
             text-align: center;
@@ -34,7 +51,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         .login-container img {
-            width: 120px; /* Ukuran logo diperbesar */
+            width: 120px;
             margin-bottom: 1rem;
         }
         h2 {
@@ -63,15 +80,23 @@
         button:hover {
             background-color: #006269;
         }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
-    <div class="background"></div>
-
     <div class="login-container">
-        <img src="image/logo1.png" alt="PEMBAYARAN SPP TPQ AL-MA'ARIF">
-        <h2>TPQ AL-MA'ARIF</h2>
-        <form action="dashboard.html" method="post">
+        <img src="image/tpq.png" alt="PEMBAYARAN SPP TPQ AL-MA'ARIF">
+        <h2>Silahkan Login</h2>
+
+        <!-- Tampilkan pesan error jika ada -->
+        <?php if (!empty($error_message)) { ?>
+            <div class="error-message"><?php echo $error_message; ?></div>
+        <?php } ?>
+
+        <form method="post" action="">
             <input type="text" name="username" placeholder="Username" required>
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit">Login</button>
