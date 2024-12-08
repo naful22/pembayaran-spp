@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 27, 2024 at 07:30 AM
+-- Generation Time: Dec 08, 2024 at 02:33 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -24,6 +24,25 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `admin`
+--
+
+CREATE TABLE `admin` (
+  `id` int(11) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admin`
+--
+
+INSERT INTO `admin` (`id`, `username`, `password`) VALUES
+(1, 'admin', '22082002');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `laporan`
 --
 
@@ -31,7 +50,7 @@ CREATE TABLE `laporan` (
   `id` int(11) NOT NULL,
   `Nis` int(11) NOT NULL,
   `Bulan` varchar(20) NOT NULL,
-  `Jumlah` int(30) NOT NULL,
+  `Jumlah` decimal(30,0) NOT NULL,
   `Status` enum('Lunas','Belum') DEFAULT 'Belum'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -42,12 +61,21 @@ CREATE TABLE `laporan` (
 --
 
 CREATE TABLE `pembayaran` (
-  `id` int(11) NOT NULL,
-  `nis` varchar(20) NOT NULL,
-  `bulan` varchar(20) NOT NULL,
-  `jumlah` int(11) NOT NULL,
+  `nama` int(11) NOT NULL,
+  `nis` varchar(15) DEFAULT NULL,
+  `bulan` varchar(10) DEFAULT NULL,
+  `tanggal_bayar` date DEFAULT NULL,
+  `jumlah` int(50) NOT NULL,
   `status` enum('Lunas','Belum Lunas') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `pembayaran`
+--
+
+INSERT INTO `pembayaran` (`nama`, `nis`, `bulan`, `tanggal_bayar`, `jumlah`, `status`) VALUES
+(14, '2001', 'Januari', NULL, 20000, 'Lunas'),
+(15, '2002', 'februari', NULL, 20000, 'Lunas');
 
 -- --------------------------------------------------------
 
@@ -67,18 +95,18 @@ CREATE TABLE `siswa` (
 --
 
 INSERT INTO `siswa` (`Nis`, `Nama`, `Kelas`, `Alamat`) VALUES
-(2000, 'aul', 1, 'keboledan'),
-(2001, 'alpin', 1, 'klampok'),
-(2002, 'aby', 2, 'adiwerna'),
-(2003, 'fatih', 2, 'larangan'),
-(2004, 'tika', 3, 'bangsri'),
-(2005, 'siti', 3, 'wanasari'),
-(2006, 'andin', 4, 'sawojajar'),
-(2007, 'edoh', 4, 'kupu');
+(2001, 'anam', 1, 'keboledan'),
+(2002, 'dika', 2, 'kendawa');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `admin`
+--
+ALTER TABLE `admin`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `laporan`
@@ -91,7 +119,7 @@ ALTER TABLE `laporan`
 -- Indexes for table `pembayaran`
 --
 ALTER TABLE `pembayaran`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`nama`);
 
 --
 -- Indexes for table `siswa`
@@ -104,6 +132,12 @@ ALTER TABLE `siswa`
 --
 
 --
+-- AUTO_INCREMENT for table `admin`
+--
+ALTER TABLE `admin`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `laporan`
 --
 ALTER TABLE `laporan`
@@ -113,7 +147,7 @@ ALTER TABLE `laporan`
 -- AUTO_INCREMENT for table `pembayaran`
 --
 ALTER TABLE `pembayaran`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `nama` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- Constraints for dumped tables
