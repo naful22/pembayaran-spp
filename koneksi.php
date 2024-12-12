@@ -1,8 +1,8 @@
 <?php
 // Setting parameter koneksi
 $host = 'localhost';        // Host database
-$username = 'root';         // Username MySQL
-$password = '';             // Password MySQL (kosong jika tidak ada password)
+$username = 'minx6158';         // Username MySQL
+$password = '3mWu4aqNzEFQ81';             // Password MySQL (kosong jika tidak ada password)
 $databasename = 'spp';         // Nama database yang digunakan (ubah sesuai dengan nama database Anda)
 
 // Membuat koneksi ke database MySQL
