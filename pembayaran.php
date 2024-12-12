@@ -1,13 +1,14 @@
 <?php
+session_start();
 include 'koneksi.php';
+
 // Handle Pembayaran
 if (isset($_POST['addPayment'])) {
     $nis = $_POST['nis'];
     $bulan = $_POST['bulan'];
     $status = $_POST['status'];
-    $jumlah = $_POST['jumlah']; // Get the Jumlah from the form
+    $jumlah = $_POST['jumlah'];
 
-    // Format Jumlah as an integer (remove commas or other characters before saving)
     $jumlah = str_replace(["Rp", "."], "", $jumlah);
 
     $query = "INSERT INTO pembayaran (Nis, Bulan, Status, Jumlah) VALUES ('$nis', '$bulan', '$status', '$jumlah')";
@@ -22,15 +23,15 @@ if (isset($_POST['addPayment'])) {
 
 // Update Pembayaran
 if (isset($_POST['updatePayment'])) {
-    $nis = $_POST['nis'];
+    $oldNis = $_POST['old_nis']; // Original NIS
+    $newNis = $_POST['nis']; // Updated NIS
     $bulan = $_POST['bulan'];
     $status = $_POST['status'];
-    $jumlah = $_POST['jumlah']; // Get the Jumlah from the form
+    $jumlah = $_POST['jumlah'];
 
-    // Format Jumlah as an integer (remove commas or other characters before saving)
     $jumlah = str_replace(["Rp", "."], "", $jumlah);
 
-    $updateQuery = "UPDATE pembayaran SET Bulan = '$bulan', Status = '$status', Jumlah = '$jumlah' WHERE Nis = '$nis'";
+    $updateQuery = "UPDATE pembayaran SET Nis = '$newNis', Bulan = '$bulan', Status = '$status', Jumlah = '$jumlah' WHERE Nis = '$oldNis'";
 
     if (mysqli_query($koneksi, $updateQuery)) {
         header("Location: pembayaran.php");
@@ -58,12 +59,12 @@ $query = "SELECT siswa.Nama, siswa.Nis, pembayaran.Bulan, pembayaran.Status, pem
           JOIN pembayaran ON siswa.Nis = pembayaran.Nis";
 $result = mysqli_query($koneksi, $query);
 
-// Error handling for the query
 if (!$result) {
     echo "Error: " . mysqli_error($koneksi);
     exit;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -77,20 +78,24 @@ if (!$result) {
         body {
             background-color: #f4f6f9;
         }
+
         .content-wrapper {
             margin-left: 200px;
         }
+
         .table {
             margin-top: 20px;
         }
+
         .table th {
-            background-color: #007bff;
-            color: white;
-        }
+    background-color: #28a745; /* AdminLTE Green color */
+    color: white;
+}
+
+
         .table tbody tr:hover {
             background-color: #e9ecef;
         }
-        
     </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -105,96 +110,91 @@ if (!$result) {
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
                     <li class="nav-item"><a href="dashboard.php" class="nav-link"><i class="nav-icon fas fa-home"></i><p>Dashboard</p></a></li>
                     <li class="nav-item"><a href="data_siswa.php" class="nav-link"><i class="nav-icon fas fa-users"></i><p>Data Siswa</p></a></li>
-                    <li class="nav-item"><a href="pembayaran.php" class="nav-link active"><i class="nav-icon fas fa-credit-card"></i><p>Pembayaran</p></a></li>
+                    <li class="nav-item"><a href="pembayaran.php" class="nav-link"><i class="nav-icon fas fa-money-bill-wave"></i><p>Pembayaran</p></a></li>
                     <li class="nav-item"><a href="laporan.php" class="nav-link"><i class="nav-icon fas fa-file-alt"></i><p>Laporan</p></a></li>
-                    <li class="nav-item"><a href="logout.php" class="nav-link" onclick="return confirmLogout();"><i class="nav-icon fas fa-sign-out-alt"></i><p>Logout</p></a></li>
+                    <li class="nav-item"><a href="logout.php" class="nav-link" onclick="return confirmLogout();"><i class="nav-icon fas fa-door-open"></i><p>Logout</p></a></li>
                 </ul>
             </nav>
         </div>
     </aside>
 
     <div class="content-wrapper">
-        <section class="content-header">
-            <h1></h1>
-        </section>
-
         <section class="content">
             <div class="container mt-4">
-                <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#addModal">
+                <button class="btn btn-success mb-3" data-toggle="modal" data-target="#addModal">
                     <i class="fas fa-plus-circle"></i> Tambah Pembayaran
                 </button>
 
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Nama</th>
-                            <th>Nis</th>
-                            <th>Bulan</th>
-                            <th>Status</th>
-                            <th>Jumlah</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while ($row = mysqli_fetch_assoc($result)) { ?>
-                        <tr>
-                            <td><?php echo $row['Nama']; ?></td>
-                            <td><?php echo $row['Nis']; ?></td>
-                            <td><?php echo $row['Bulan']; ?></td>
-                            <td><?php echo $row['Status']; ?></td>
-                            <td>Rp <?php echo number_format($row['Jumlah'], 0, ',', '.'); ?></td> <!-- Format Jumlah as Rp currency -->
-                            <td>
-                                <button class='btn btn-success btn-sm' data-toggle='modal' data-target='#editModal<?php echo $row['Nis']; ?>'>
-                                    <i class='fas fa-edit'></i> Edit
-                                </button>
-                                <button class='btn btn-danger btn-sm' onclick='deletePayment("<?php echo $row['Nis']; ?>")'>
-                                    <i class='fas fa-trash'></i> Hapus
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Modal Edit Pembayaran -->
-                        <div class="modal fade" id="editModal<?php echo $row['Nis']; ?>" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <form method="POST" action="pembayaran.php">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="editModalLabel">Edit Pembayaran</h5>
-                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="form-group">
-                                                <label>Nis</label>
-                                                <input type="text" name="nis" class="form-control" value="<?php echo $row['Nis']; ?>" readonly required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Bulan</label>
-                                                <input type="text" name="bulan" class="form-control" value="<?php echo $row['Bulan']; ?>" required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Status</label>
-                                                <input type="text" name="status" class="form-control" value="<?php echo $row['Status']; ?>" required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Jumlah</label>
-                                                <input type="text" name="jumlah" class="form-control" value="Rp <?php echo number_format($row['Jumlah'], 0, ',', '.'); ?>" required>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" name="updatePayment" class="btn btn-primary">Simpan</button>
-                                        </div>
-                                    </form>
-                                </div>
+                <table class="table table-bordered table-hover table-striped">
+    <thead>
+        <tr>
+            <th>Nama</th>
+            <th>Nis</th>
+            <th>Bulan</th>
+            <th>Status</th>
+            <th>Jumlah</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php while ($row = mysqli_fetch_assoc($result)) { ?>
+        <tr>
+            <td><?php echo $row['Nama']; ?></td>
+            <td><?php echo $row['Nis']; ?></td>
+            <td><?php echo $row['Bulan']; ?></td>
+            <td><?php echo $row['Status']; ?></td>
+            <td>Rp <?php echo number_format($row['Jumlah'], 0, ',', '.'); ?></td>
+            <td>
+                <button class='btn btn-success btn-sm' data-toggle='modal' data-target='#editModal<?php echo $row['Nis']; ?>'>
+                    <i class='fas fa-edit'></i> Edit
+                </button>
+                <button class='btn btn-danger btn-sm' onclick='deletePayment("<?php echo $row['Nis']; ?>")'>
+                    <i class='fas fa-trash'></i> Hapus
+                </button>
+            </td>
+        </tr>
+        <!-- Modal Edit Pembayaran -->
+        <div class="modal fade" id="editModal<?php echo $row['Nis']; ?>" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="pembayaran.php">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editModalLabel">Edit Pembayaran</h5>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Nis Lama</label>
+                                <input type="hidden" name="old_nis" value="<?php echo $row['Nis']; ?>">
+                                <input type="text" name="nis" class="form-control" value="<?php echo $row['Nis']; ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Bulan</label>
+                                <input type="text" name="bulan" class="form-control" value="<?php echo $row['Bulan']; ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <input type="text" name="status" class="form-control" value="<?php echo $row['Status']; ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Jumlah</label>
+                                <input type="text" name="jumlah" class="form-control" value="Rp <?php echo number_format($row['Jumlah'], 0, ',', '.'); ?>" required>
                             </div>
                         </div>
-                        <?php } ?>
-                    </tbody>
-                </table>
+                        <div class="modal-footer">
+                            <button type="submit" name="updatePayment" class="btn btn-success">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <?php } ?>
+    </tbody>
+</table>
             </div>
         </section>
     </div>
 </div>
-
 
 <!-- Modal Add Pembayaran -->
 <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
@@ -207,7 +207,7 @@ if (!$result) {
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>NIS</label>
+                        <label>Nis</label>
                         <input type="text" name="nis" class="form-control" required>
                     </div>
                     <div class="form-group">
@@ -224,7 +224,7 @@ if (!$result) {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="addPayment" class="btn btn-primary">Tambah</button>
+                    <button type="submit" name="addPayment" class="btn btn-success">Tambah</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
                 </div>
             </form>
@@ -233,14 +233,12 @@ if (!$result) {
 </div>
 
 <script>
-    // Function to confirm deletion
     function deletePayment(nis) {
         if (confirm("Apakah Anda yakin ingin menghapus pembayaran untuk NIS: " + nis + "?")) {
             window.location.href = "pembayaran.php?deleteNis=" + nis;
         }
     }
 
-    // Function to confirm logout
     function confirmLogout() {
         return confirm("Apakah Anda yakin ingin keluar?");
     }

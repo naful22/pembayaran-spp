@@ -1,7 +1,8 @@
-<?php
-include 'koneksi.php';
+<?php 
+session_start(); 
+include 'koneksi.php'; 
 
-// Handle Tambah Siswa
+// Handle Add Student
 if (isset($_POST['addStudent'])) {
     $Nis = $_POST['nis'];
     $Nama = $_POST['nama'];
@@ -13,27 +14,37 @@ if (isset($_POST['addStudent'])) {
         header("Location: data_siswa.php");
         exit;
     } else {
-        echo "Error: " . mysqli_error($koneksi);  // Menampilkan error dari query
-    }    
+        echo "Error: " . mysqli_error($koneksi);  // Display query error
+    }
 }
 
-// Handle Edit Siswa
+// Handle Edit Student
 if (isset($_POST['editStudent'])) {
-    $Nis = $_POST['nis'];
+    $OldNis = $_POST['old_nis']; // Old Nis
+    $Nis = $_POST['nis']; // New Nis
     $Nama = $_POST['nama'];
     $Kelas = $_POST['kelas'];
     $Alamat = $_POST['alamat'];
 
-    $query = "UPDATE siswa SET Nama='$Nama', Kelas='$Kelas', Alamat='$Alamat' WHERE Nis='$Nis'";
-    if (mysqli_query($koneksi, $query)) {
-        header("Location: data_siswa.php");
-        exit;
+    // Check if new Nis already exists in the database
+    $checkQuery = "SELECT * FROM siswa WHERE Nis='$Nis' AND Nis!='$OldNis'";
+    $checkResult = mysqli_query($koneksi, $checkQuery);
+
+    if (mysqli_num_rows($checkResult) > 0) {
+        echo "<script>alert('NIS $Nis already in use. Please use a different Nis.'); window.location='data_siswa.php';</script>";
     } else {
-        echo "Error: " . mysqli_error($koneksi);
+        // Update student record
+        $query = "UPDATE siswa SET Nis='$Nis', Nama='$Nama', Kelas='$Kelas', Alamat='$Alamat' WHERE Nis='$OldNis'";
+        if (mysqli_query($koneksi, $query)) {
+            header("Location: data_siswa.php");
+            exit;
+        } else {
+            echo "Error: " . mysqli_error($koneksi);
+        }
     }
 }
 
-// Handle Hapus Siswa
+// Handle Delete Student
 if (isset($_GET['deleteId'])) {
     $Nis = $_GET['deleteId'];
 
@@ -46,7 +57,7 @@ if (isset($_GET['deleteId'])) {
     }
 }
 
-// Ambil data siswa
+// Fetch students data
 $query = "SELECT * FROM siswa";
 $result = mysqli_query($koneksi, $query);
 ?>
@@ -61,36 +72,44 @@ $result = mysqli_query($koneksi, $query);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"> <!-- AdminLTE CSS -->
     <style>
-        body {
-            background-color: #f4f6f9; /* Warna latar belakang */
-        }
-        .content-wrapper {
-            margin-left: 0; /* Reset any margin from previous customizations */
-            margin-left: 200px; /* Adjust the left margin to match the sidebar width */
-        }
-        .table {
-            margin-top: 20px; /* Tambahkan margin atas untuk jarak */
-        }
-        .table th {
-            background-color: #007bff; /* Warna latar belakang header */
-            color: white; /* Warna teks header */
-        }
-        .table tbody tr:hover {
-            background-color: #e9ecef; /* Warna latar belakang saat hover */
-        }
-        .modal-header {
-            background-color: #007bff; /* Warna latar belakang modal header */
-            color: white; /* Warna teks modal header */
-        }
-        .btn-primary {
-            background-color: #007bff; /* Warna tombol primary */
-            border-color: #007bff; /* Warna border tombol primary */
-        }
-        .btn-danger {
-            background-color: #dc3545; /* Warna tombol danger */
-            border-color: #dc3545; /* Warna border tombol danger */
-        }
-    </style>
+    body {
+        background-color: #f4f6f9; /* Background color */
+    }
+
+    .table {
+        margin-top: 20px; /* Add top margin for spacing */
+    }
+
+    .table th {
+        background-color: #28a745; /* Light green for table header */
+        color: white; /* White text for header */
+    }
+
+    .table tbody tr:hover {
+        background-color: #d4edda; /* Light green on hover */
+    }
+
+    .modal-header {
+        background-color: #28a745; /* Light green for modal header */
+        color: white; /* White text in modal header */
+    }
+
+    .btn-primary {
+        background-color: #28a745; /* Light green for primary button */
+        border-color: #28a745; /* Border light green for primary button */
+    }
+
+    .btn-primary:hover {
+        background-color: #218838; /* Darker green on hover */
+        border-color: #218838; /* Darker green border on hover */
+    }
+
+    .btn-danger {
+        background-color: #dc3545; /* Red for danger button */
+        border-color: #dc3545; /* Red border for danger button */
+    }
+</style>
+
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -110,14 +129,14 @@ $result = mysqli_query($koneksi, $query);
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="data_siswa.php" class="nav-link active">
+                        <a href="data_siswa.php" class="nav-link">
                             <i class="nav-icon fas fa-users"></i>
                             <p>Data Siswa</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="pembayaran.php" class="nav-link">
-                            <i class="nav-icon fas fa-credit-card"></i>
+                            <i class="nav-icon fas fa-money-bill-wave"></i>
                             <p>Pembayaran</p>
                         </a>
                     </li>
@@ -129,7 +148,7 @@ $result = mysqli_query($koneksi, $query);
                     </li>
                     <li class="nav-item">
                         <a href="logout.php" class="nav-link" onclick="return confirmLogout();">
-                            <i class="nav-icon fas fa-sign-out-alt"></i>
+                            <i class="nav-icon fas fa-door-open"></i>
                             <p>Logout</p>
                         </a>
                     </li>
@@ -140,47 +159,52 @@ $result = mysqli_query($koneksi, $query);
 
     <!-- Content -->
     <div class="content-wrapper">
-        <section class="content-header">
-            <h1></h1>
-        </section>
         <section class="content">
             <div class="container mt-4">
-                <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#addModal">
-                    <i class="fas fa-plus-circle"></i> Tambah Siswa
-                </button>
+            <button class="btn btn-success mb-3" data-toggle="modal" data-target="#addModal">
+    <i class="fas fa-plus-circle"></i> Tambah Siswa
+</button>
+
+
                 <table class="table table-bordered">
-    <thead>
-    <tr>
-        <th>Nis</th>
-        <th>Nama</th>
-        <th>Kelas</th>
-        <th>Alamat</th>
-        <th>Aksi</th>
-    </tr>
-    </thead>
-    <tbody>
-    <?php
-    while ($row = mysqli_fetch_assoc($result)) {
-        echo "<tr>";
-        echo "<td>{$row['Nis']}</td>";
-        echo "<td>{$row['Nama']}</td>";
-        echo "<td>{$row['Kelas']}</td>";
-        echo "<td>{$row['Alamat']}</td>";
-        echo "<td>
-                <button class='btn btn-success btn-sm' data-toggle='modal' data-target='#editModal' 
-                       data-nis='{$row['Nis']}' data-nama='{$row['Nama']}' data-kelas='{$row['Kelas']}' data-alamat='{$row['Alamat']}'>
-                    <i class='fas fa-edit'></i> Edit
-                </button>
-                <a href='data_siswa.php?deleteId={$row['Nis']}' class='btn btn-danger btn-sm' 
-                   onclick='return confirm(\"Apakah kamu yakin ingin menghapus data siswa?\");'>
-                    <i class='fas fa-trash'></i> Hapus
-                </a>
-              </td>";
-        echo "</tr>";
-    }
-    ?>
-    </tbody>
-</table><!-- Modal Tambah Siswa -->
+                    <thead>
+                        <tr>
+                            <th>Nis</th>
+                            <th>Nama</th>
+                            <th>Kelas</th>
+                            <th>Alamat</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        while ($row = mysqli_fetch_assoc($result)) {
+                            echo "<tr>";
+                            echo "<td>{$row['Nis']}</td>";
+                            echo "<td>{$row['Nama']}</td>";
+                            echo "<td>{$row['Kelas']}</td>";
+                            echo "<td>{$row['Alamat']}</td>";
+                            echo "<td>
+                                    <button class='btn btn-success btn-sm' data-toggle='modal' data-target='#editModal' 
+                                            data-nis='{$row['Nis']}' data-nama='{$row['Nama']}' data-kelas='{$row['Kelas']}' data-alamat='{$row['Alamat']}'>
+                                        <i class='fas fa-edit'></i> Edit
+                                    </button>
+                                    <a href='data_siswa.php?deleteId={$row['Nis']}' class='btn btn-danger btn-sm' 
+                                       onclick='return confirm(\"Apakah kamu yakin ingin menghapus data siswa?\");'>
+                                        <i class='fas fa-trash'></i> Hapus
+                                    </a>
+                                  </td>";
+                            echo "</tr>";
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- Modal Tambah Siswa -->
 <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -227,7 +251,8 @@ $result = mysqli_query($koneksi, $query);
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Nis</label>
-                        <input type="text" name="nis" id="editNis" class="form-control" readonly required>
+                        <input type="text" name="nis" id="editNis" class="form-control" required>
+                        <input type="hidden" name="old_nis" id="oldNis">
                     </div>
                     <div class="form-group">
                         <label>Nama</label>
@@ -250,7 +275,6 @@ $result = mysqli_query($koneksi, $query);
     </div>
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -264,6 +288,7 @@ $result = mysqli_query($koneksi, $query);
 
         var modal = $(this);
         modal.find('#editNis').val(nis);
+        modal.find('#oldNis').val(nis); // Old Nis
         modal.find('#editNama').val(nama);
         modal.find('#editKelas').val(kelas);
         modal.find('#editAlamat').val(alamat);

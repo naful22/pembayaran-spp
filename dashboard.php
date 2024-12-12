@@ -68,7 +68,7 @@ if (!isset($_SESSION['username'])) {
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
                     <li class="nav-item">
-                        <a href="dashboard.php" class="nav-link active">
+                        <a href="dashboard.php" class="nav-link">
                             <i class="nav-icon fas fa-home"></i>
                             <p>Dashboard</p>
                         </a>
@@ -81,7 +81,7 @@ if (!isset($_SESSION['username'])) {
                     </li>
                     <li class="nav-item">
                         <a href="pembayaran.php" class="nav-link">
-                            <i class="nav-icon fas fa-credit-card"></i>
+                            <i class="nav-icon fas fa-money-bill-wave"></i>
                             <p>Pembayaran</p>
                         </a>
                     </li>
@@ -93,7 +93,7 @@ if (!isset($_SESSION['username'])) {
                     </li>
                     <li class="nav-item">
                         <a href="logout.php" class="nav-link" onclick="return confirmLogout();">
-                            <i class="nav-icon fas fa-sign-out-alt"></i>
+                            <i class="nav-icon fas fa-door-open"></i>
                             <p>Logout</p>
                         </a>
                     </li>
@@ -131,7 +131,7 @@ if (!isset($_SESSION['username'])) {
                             <p>Pembayaran</p>
                         </div>
                         <div class="icon">
-                            <i class="fas fa-credit-card"></i>
+                            <i class="fas fa-money-bill-wave"></i>
                         </div>
                         <a href="pembayaran.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                     </div>

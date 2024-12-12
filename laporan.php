@@ -1,6 +1,6 @@
 <?php
+session_start();
 include 'koneksi.php';
-
 // Handle Filter (if any)
 $filterBulan = '';
 if (isset($_POST['filterBulan'])) {
@@ -35,36 +35,77 @@ if (!$result) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <style>
-        body {
-            background-color: #f4f6f9;
-        }
-        .content-wrapper {
-            margin-left: 200px;
-        }
-        .table {
-            margin-top: 20px;
-        }
-        .table th {
-            background-color: #007bff;
-            color: white;
-        }
-        .table tbody tr:hover {
-            background-color: #e9ecef;
-        }
-        .btn-print {
-    background-color: #007bff;
-    color: white;
-    padding: 5px 10px; /* Reduced padding for a smaller button */
-    border-radius: 5px;
-    font-weight: normal; /* Optional: to make the text less bold */
-    font-size: 14px; /* Adjust the font size */
-    transition: background-color 0.3s;
-}
-.btn-print:hover {
-    background-color: #0056b3;
-}
+    body {
+        background-color: #f4f6f9;
+    }
 
-    </style>
+    .content-wrapper {
+        margin-left: 200px;
+    }
+
+    .table {
+        margin-top: 20px;
+    }
+
+    .table th {
+        background-color: #28a745; /* Green color */
+        color: white;
+    }
+
+    .table tbody tr:hover {
+        background-color: #e9ecef;
+    }
+
+    .btn-print {
+        background-color: #28a745; /* Green color */
+        color: white;
+        padding: 5px 10px; /* Reduced padding for a smaller button */
+        border-radius: 5px;
+        font-weight: normal; /* Optional: to make the text less bold */
+        font-size: 14px; /* Adjust the font size */
+        transition: background-color 0.3s;
+    }
+
+    .btn-print:hover {
+        background-color: #218838; /* Darker green on hover */
+    }
+
+    .btn-success {
+        background-color: #28a745; /* Green color */
+        color: white;
+    }
+
+    .btn-success:hover {
+        background-color: #218838; /* Darker green on hover */
+    }
+
+    /* CSS khusus untuk cetak */
+    @media print {
+        /* Sembunyikan sidebar */
+        .main-sidebar,
+        .navbar-nav,
+        .btn-print,
+        form {
+            display: none !important;
+        }
+
+        /* Atur margin untuk tampilan cetak */
+        .content-wrapper {
+            margin: 0 !important;
+        }
+
+        /* Tampilkan hanya tabel */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            border: 1px solid #000;
+            padding: 5px;
+        }
+    }
+</style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -91,19 +132,19 @@ if (!$result) {
                     </li>
                     <li class="nav-item">
                         <a href="pembayaran.php" class="nav-link">
-                            <i class="nav-icon fas fa-credit-card"></i>
+                            <i class="nav-icon fas fa-money-bill-wave"></i>
                             <p>Pembayaran</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="laporan.php" class="nav-link active">
+                        <a href="laporan.php" class="nav-link">
                             <i class="nav-icon fas fa-file-alt"></i>
                             <p>Laporan</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="logout.php" class="nav-link">
-                            <i class="nav-icon fas fa-sign-out-alt"></i>
+                            <i class="nav-icon fas fa-door-open"></i>
                             <p>Logout</p>
                         </a>
                     </li>
@@ -124,7 +165,7 @@ if (!$result) {
                 <form method="POST" action="" class="form-inline mb-3">
                     <label for="bulan" class="mr-2">Filter Bulan:</label>
                     <input type="text" name="bulan" id="bulan" class="form-control mr-2" placeholder="Masukkan Bulan" value="<?php echo $filterBulan; ?>">
-                    <button type="submit" name="filterBulan" class="btn btn-primary">Filter</button>
+                    <button type="submit" name="filterBulan" class="btn btn-success">Filter</button>
                     <a href="laporan_pembayaran.php" class="btn btn-secondary ml-2">Reset</a>
                 </form>
 
